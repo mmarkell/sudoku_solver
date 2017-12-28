@@ -16,11 +16,11 @@ class Tester():
 	def test_everything(self):
 		self.assert_pass('board_one.txt')
 		self.assert_pass('board_two.txt')
-		# self.assert_pass('board_three.txt')
-		# self.assert_pass('board_four.txt')
-		# self.assert_pass('board_five.txt')
-		# self.assert_pass('board_six.txt')
-		# self.assert_pass('board_seven.txt')
+		self.assert_pass('board_three.txt')
+		self.assert_pass('board_four.txt')
+		self.assert_pass('board_five.txt')
+		self.assert_pass('board_six.txt')
+		self.assert_pass('board_seven.txt')
 
 def main():
 	tester = Tester()
