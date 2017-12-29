@@ -20,12 +20,12 @@ def solve(board):
 
 def generate(board):
 	board, _ = solve(board)
-	for i in range(8):
-		for j in range(8):
-			x, y = random.randint(0, 8), random.randint(0, 8)
-			board[x][y] = Position(0)
-	print_board(board)
+	for i in range(60):
+		x, y = random.randint(0, 8), random.randint(0, 8)
+		board[x][y] = Position(0)
+	print_to_lines(board)
 	return board
+
 def search_for_solution(board):
 	if bad_board(board):
 		return board, False
@@ -114,7 +114,14 @@ def print_board(board):
 		for idx2, col in enumerate(row):
 			if idx2 % 3 == 0 and idx2 != 0:
 				buff += " | "
-			buff += " " + str(col.value) #+ " p " + str(col.possible)
+			buff += " " + str(col.value)
 		print(buff)
 		bufff += buff + "\n"
 	return bufff
+
+def print_to_lines(board):
+	buff = ""
+	for i in board:
+		for j in i:
+			buff += str(j.value)
+	print(buff)

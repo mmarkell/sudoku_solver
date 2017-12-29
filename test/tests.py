@@ -7,7 +7,7 @@ from delayed_assert import expect, assert_expectations
 def solve_it(arg):
 	file = load(arg)
 	parsed = parse(file)
-	return solve(parse(file))
+	return solve(parse(file))[1]
 
 def check_pass(arg):
 	expect(solve_it('../boards/' + arg) == True)
