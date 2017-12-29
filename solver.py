@@ -23,6 +23,7 @@ def generate(board):
 	for i in range(60):
 		x, y = random.randint(0, 8), random.randint(0, 8)
 		board[x][y] = Position(0)
+	print_board(board)
 	print_to_lines(board)
 	return board
 
