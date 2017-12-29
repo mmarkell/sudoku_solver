@@ -1,37 +1,48 @@
 import time
 import pickle
 import copy
+import random
 from pos import Position
 
 def solve(board):
-	start = time.clock()
 	print_board(board)
-	board = prune_possibilities(board)
+	start = time.clock()
 	board, v = search_for_solution(board)
 	t = time.clock() - start
 	print("took %f secs to finish" % t)
 	if board_full(board):
 		print("solution")
 		print_board(board)
-		return True
+		return board, True
 	else:
 		print("couldnt solve")
-		return False
+		return board, False
 
+def generate(board):
+	board, _ = solve(board)
+	for i in range(8):
+		for j in range(8):
+			x, y = random.randint(0, 8), random.randint(0, 8)
+			board[x][y] = Position(0)
+	print_board(board)
+	return board
 def search_for_solution(board):
-    if bad_board(board):
-    	return board, False
-    if board_full(board): 
-    	return board, True
-    board = prune_possibilities(board)
-    i, j = get_min_move(board)
-    if i == -1:
-    	return board, True
-    for d in [x for x in board[i][j].possible]:
-    	board2, good = search_for_solution(add_piece(pickle.loads(pickle.dumps(board)), d, i, j))
-    	if good:
-    		return board2, True
-    return board, False
+	if bad_board(board):
+		return board, False
+	if board_full(board):
+		return board, True
+
+	changed = True
+	board = prune_possibilities(board)
+	i, j = get_min_move(board)
+	if i == -1:
+		return board, False
+
+	for v in board[i][j].possible:
+		possible, good = search_for_solution(add_piece(pickle.loads(pickle.dumps(board)), v, i, j))
+		if good:
+			return possible, True
+	return board, False
 
 def add_piece(board, v, i, j):
 	board[i][j] = Position(v)
@@ -39,19 +50,13 @@ def add_piece(board, v, i, j):
 
 def prune_possibilities(board):
 	for i in range(len(board)):
-		for j in range(len(board[i])):
-			for new_j in range(0, len(board)):
-				if board[i][new_j].value == 0 and board[i][j].value in board[i][new_j].possible:
-					possible = [x for x in board[i][new_j].possible if x != board[i][j].value]
-					board[i][new_j].possible = possible
-			for new_i in range(0, len(board[j])):
-				if board[new_i][j].value == 0 and board[i][j].value in board[new_i][j].possible:
-					possible = [x for x in board[new_i][j].possible if x != board[i][j].value]
-					board[new_i][j].possible = possible
-	for i in range(len(board)):
-		for j in range(len(board[i])):
-			if len(board[i][j].possible) == 1:
-				add_piece(board, board[i][j].possible[0], i,j)
+		for j in range(len(board)):
+			rows = [v for v in [board[x][j].value for x in range(len(board))] if v != 0]
+			cols = [v for v in [board[i][x].value for x in range(len(board))] if v != 0]
+			square = [v for v in [[board[((i - i % 3) + di) % 9][((j - j % 3) + dj) % 9].value for di in range(3)] for dj in range(3)]]
+			left_over = [x for x in board[i][j].possible if x not in rows and x not in cols and x not in square]
+			if len(left_over) >= 1:
+				board[i][j].possible = left_over
 	return board
 
 def bad_board(board):
@@ -70,7 +75,7 @@ def bad_board(board):
 	for i in range(3):
 		for j in range(3):
 			elements = []
-			for a in range(i*3,i*3 +3 ):
+			for a in range(i*3,i*3 + 3):
 				for b in range(j*3, j*3 + 3):
 					if board[a][b].value != 0 and board[a][b].value in elements:
 						return True
@@ -87,16 +92,21 @@ def board_full(board):
 
 def get_min_move(board):
 	curr_best = 11
-	best_i, best_j = -1, -1
+	best = [[-1, -1]]
 	for i in range(len(board)):
 		for j in range(len(board[i])):
 			if len(board[i][j].possible) < curr_best and len(board[i][j].possible) >= 1:
 				curr_best = len(board[i][j].possible)
-				best_i, best_j = i, j
-	return best_i, best_j
+				best = [[i, j]]
+			elif len(board[i][j].possible) == curr_best and len(board[i][j].possible) >- 1:
+				best += [[i, j]]
+	random.shuffle(best)
+	to_return = best[0]
+	return to_return[0], to_return[1]
 
 def print_board(board):
 	print("*" * 27)
+	bufff = ""
 	for idx, row in enumerate(board):
 		if idx % 3 == 0:
 			print("-" * 27)
@@ -104,5 +114,7 @@ def print_board(board):
 		for idx2, col in enumerate(row):
 			if idx2 % 3 == 0 and idx2 != 0:
 				buff += " | "
-			buff += " " + str(col.value)
+			buff += " " + str(col.value) #+ " p " + str(col.possible)
 		print(buff)
+		bufff += buff + "\n"
+	return bufff
